@@ -10,3 +10,5 @@ Description: This package implements the "robust estimation in the normal mixtur
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
+URL: https://github.com/ge-li/robustGMM
+BugReports: https://github.com/ge-li/robustGMM/issues
