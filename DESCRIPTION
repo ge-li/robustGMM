@@ -1,0 +1,12 @@
+Package: robustGMM
+Type: Package
+Title: Robust Estimation in Gaussian Mixture Model
+Version: 0.1.0
+Authors@R: 
+    person("Li", "Ge", , "li.ge@outlook.com", role = c("aut", "cre"),
+           comment = c(ORCID = "YOUR-ORCID-ID"))
+Maintainer: Li Ge <li.ge@outlook.com>
+Description: This package implements the "robust estimation in the normal mixture model" by (Fujisawa & Eguchi 2006).
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
