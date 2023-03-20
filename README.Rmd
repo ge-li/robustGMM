@@ -1,0 +1,97 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+```
+
+# robustGMM
+
+<!-- badges: start -->
+<!-- badges: end -->
+
+The goal of robustGMM is to implement the robust Gaussian Mixture Model (GMM) estimation based on [Fujisawa and Eguchi, 2006](https://doi.org/10.1016/j.jspi.2005.03.008).
+
+## Installation
+
+You can install the development version of robustGMM from [GitHub](https://github.com/) with:
+
+``` r
+# install.packages("devtools")
+devtools::install_github("ge-li/robustGMM")
+```
+
+## Example
+
+This is a basic example which shows you how to solve a common problem:
+
+```{r}
+## Generate a 2-component mixture 
+library(robustGMM)
+set.seed(404)
+lambda <- c(0.25, 0.75)
+mu <- c(0, 4)
+sigma <- c(1, 1)
+x <- rnormix(n=100, lambda, mu, sigma)
+x[which.max(x)] <- 10 # outlier
+plot(density(x))
+```
+
+The standard EM algorithm will give estimation results as follows:
+```{r}
+standard_mod <- mixtools::normalmixEM(x, lambda, mu, sigma)
+standard_mod$lambda
+standard_mod$mu
+standard_mod$sigma
+```
+
+The robust EM algorithm in this package will give:
+```{r}
+robust_mod <- robustGMM(x, lambda, mu, sigma, beta=0.1, verbose=TRUE)
+robust_mod$lambda
+robust_mod$mu
+robust_mod$sigma
+```
+
+## Selection of tuning parameter 
+```{r}
+betas <- seq(0.01, 0.2, by=0.01)
+div <- numeric(0)
+for (beta in betas) {
+  div <- c(div, loo_cvm_div(x, lambda, mu, sigma, beta))
+}
+```
+
+```{r}
+plot(betas, div, xlab="beta", ylab="empirical Cramer–von Mises divergence", 
+     main="Selection of optimal tuning parameter on contaminated synthetic data.")
+```
+
+```{r}
+res <- purrr::map_dfr(betas, ~unlist(robustGMM(x, lambda, mu, sigma, .)))
+res
+```
+
+```{r}
+par(mfrow=c(2, 2))
+plot(mu1 ~ beta, res, ylim=c(mu[1]-0.2, mu[1]+0.2))
+abline(h = mu[1], col="gold")
+abline(v = betas[which.min(div)], col="darkgreen", lty=2)
+plot(mu2 ~ beta, res, ylim=c(mu[2]-0.2, mu[2]+0.2))
+abline(h = mu[2], col="gold")
+abline(v = betas[which.min(div)], col="darkgreen", lty=2)
+plot(sigma1 ~ beta, res, ylim=c(sigma[1]-0.2, sigma[1]+0.2))
+abline(h = sigma[1], col="gold")
+abline(v = betas[which.min(div)], col="darkgreen", lty=2)
+plot(sigma2 ~ beta, res, ylim=c(sigma[2]-0.2, sigma[2]+0.2))
+abline(h = sigma[2], col="gold")
+abline(v = betas[which.min(div)], col="darkgreen", lty=2)
+```
